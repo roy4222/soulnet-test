@@ -43,96 +43,52 @@ npm install date-fns
 ## 3. 建立專案結構
 
 ```bash
-src/
-├── assets/                 # 靜態資源
-│   ├── images/
-│   │   └── default-avatar.png
-│   ├── icons/
-│   │   └── logo.svg
-│   └── styles/
-│       └── global.css
+C:.
+├── App.jsx                # 應用程式主入口
+├── main.jsx              # React 渲染入口
 │
-├── components/            # 共用元件
-│   ├── common/           # 基礎 UI 元件
-│   │   ├── Button.jsx
-│   │   ├── Input.jsx
-│   │   ├── Modal.jsx
-│   │   ├── LoadingSpinner.jsx
-│   │   └── ErrorMessage.jsx
-│   ├── layout/          
-│   │   ├── Header.jsx    # 從原本的 components/Header.jsx 移動
-│   │   ├── Footer.jsx    # 從原本的 components/Footer.jsx 移動
-│   │   └── Sidebar.jsx   # 從原本的 components/Category/CategorySidebar.jsx 移動
-│   └── form/            
-│       ├── TextField.jsx
-│       └── SelectField.jsx
+├── assets/               # 靜態資源
+│   ├── icons/           # 圖標文件
+│   ├── images/          # 圖片資源
+│   └── styles/          # 樣式文件
+│       └── global.css   # 全局樣式
 │
-├── features/             # 功能模組
-│   ├── auth/            # 認證相關
+├── components/           # 共用元件
+│   ├── Post/            # 文章相關元件
+│   │   ├── PostForm.jsx
+│   │   ├── ImageUploader.jsx
+│   │   └── ImagePreviewList.jsx
+│   ├── Profile/         # 個人資料相關元件
+│   │   └── ProfilePostsList.jsx
+│   └── UI/              # 基礎 UI 元件
+│       ├── BackButton.jsx
+│       ├── LoadingState.jsx
+│       └── SuccessMessage.jsx
+│
+├── contexts/            # Context API
+│   ├── AuthContext.jsx
+│   └── ThemeContext.jsx
+│
+├── features/           # 功能模組
+│   ├── auth/          # 認證相關功能
 │   │   ├── components/
-│   │   │   ├── LoginForm.jsx     # 從原本的 pages/Sign.jsx 拆分
-│   │   │   └── RegisterForm.jsx  # 從原本的 pages/Register.jsx 拆分
-│   │   ├── hooks/
-│   │   │   └── useAuth.js        # 從原本的 contexts/AuthContext.jsx 拆分
-│   │   └── services/
-│   │       └── authService.js     # 處理認證相關的 API 呼叫
-│   │
-│   ├── posts/           # 文章相關
-│   │   ├── components/
-│   │   │   ├── PostCard.jsx      # 從原本的 components/Post/PostCard.jsx 移動
-│   │   │   ├── PostHeader.jsx    # 從原本的 components/Post/PostHeader.jsx 移動
-│   │   │   ├── PostContent.jsx   # 從原本的 components/Post/PostContent.jsx 移動
-│   │   │   └── PostActions.jsx   # 從原本的 components/Post/PostActions.jsx 移動
-│   │   ├── hooks/
-│   │   │   └── usePost.js        # 新增: 處理文章相關的邏輯
-│   │   └── services/
-│   │       └── postService.js     # 處理文章相關的 API 呼叫
-│   │
-│   └── profile/         # 個人資料相關
+│   │   │   └── PasswordStrength/
+│   │   └── hooks/
+│   │       └── useAuth.js
+│   └── posts/         # 文章相關功能
 │       ├── components/
-│       │   ├── ProfileHeader.jsx  # 從原本的 components/Profile/ProfileHeader.jsx 移動
-│       │   └── ProfilePosts.jsx   # 從原本的 components/Profile/ProfilePostsList.jsx 移動
-│       └── services/
-│           └── profileService.js   # 處理個人資料相關的 API 呼叫
-│
-├── hooks/               # 全局共用 hooks
-│   ├── useTheme.js      # 從原本的 contexts/themeContext.jsx 拆分
-│   └── useScrollToTop.js # 新增: 處理回到頂部功能
-│
-├── services/            # API 服務
-│   ├── firebase.js      # 從原本的 utils/firebase.js 移動
-│   ├── api.js          # 新增: API 請求的基礎配置
-│   └── storage.js      # 新增: 處理檔案上傳相關
-│
-├── utils/              # 工具函數
-│   ├── dateFormat.js   # 新增: 處理日期格式化
-│   ├── validation.js   # 新增: 表單驗證
-│   └── imageUtils.js   # 從原本的 utils/imageUtils.js 移動
-│
-├── constants/          # 常量定義
-│   ├── routes.js       # 從原本的 routes.js 移動
-│   └── config.js       # 新增: 應用配置常量
-│
-├── contexts/           # Context API
-│   ├── AuthContext.jsx # 從原本的 contexts/AuthContext.jsx 移動
-│   └── ThemeContext.jsx # 從原本的 contexts/themeContext.jsx 移動
+│       └── hooks/
+│           └── usePost.js
 │
 ├── pages/             # 頁面組件
-│   ├── Home/
-│   │   ├── index.jsx   # 從原本的 pages/HomePage.jsx 移動
-│   │   └── components/ # Home 頁面專用組件
-│   ├── Profile/
-│   │   └── index.jsx   # 從原本的 pages/Profile.jsx 移動
-│   └── Admin/
-│       └── index.jsx   # 從原本的 pages/AdminPanel.jsx 移動
+│   ├── HomePage.jsx
+│   ├── NewPost.jsx
+│   ├── EditPost.jsx
+│   └── ResetPassword.jsx
 │
-├── layouts/           # 頁面布局
-│   ├── MainLayout.jsx  # 新增: 包含 Header 和 Footer 的主要布局
-│   ├── AdminLayout.jsx # 新增: 管理後台布局
-│   └── AuthLayout.jsx  # 新增: 登入/註冊頁面布局
-│
-├── App.jsx
-└── main.jsx
+└── utils/            # 工具函數
+    ├── firebase.js
+    └── imageUtils.js
 ```
 
 ## 4. 設置 Firebase
