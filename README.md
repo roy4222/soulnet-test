@@ -16,13 +16,18 @@ npm install
 ## 2. 安裝必要的依賴套件
 
 ```bash
+1.核心套件
 # React 相關
 npm install react react-dom
 npm install react-router-dom
 
+2.後端服務
 # Firebase 相關
 npm install firebase
+# R2 上傳相關
+npm install @aws-sdk/client-s3 uuid
 
+3.UI相關
 # 動畫相關
 npm install framer-motion
 
@@ -30,9 +35,6 @@ npm install framer-motion
 npm install -D tailwindcss postcss autoprefixer
 npm install @headlessui/react @heroicons/react
 npm install classnames
-
-# R2 上傳相關
-npm install @aws-sdk/client-s3 uuid
 
 # 工具類
 npm install date-fns
@@ -42,54 +44,92 @@ npm install date-fns
 
 ```bash
 src/
-├── assets/                 # 靜態資源 (圖片、樣式等)
+├── assets/                 # 靜態資源
 │   ├── images/
+│   │   └── default-avatar.png
 │   ├── icons/
+│   │   └── logo.svg
 │   └── styles/
+│       └── global.css
 │
-├── components/             # 共用元件 (可重複使用的 UI)
-│   ├── common/            # 基礎UI元件 (Button, Input, Modal)
-│   ├── layout/            # 版面相關 (Header, Footer, Sidebar)
-│   └── form/              # 表單元件 (可選)
+├── components/            # 共用元件
+│   ├── common/           # 基礎 UI 元件
+│   │   ├── Button.jsx
+│   │   ├── Input.jsx
+│   │   ├── Modal.jsx
+│   │   ├── LoadingSpinner.jsx
+│   │   └── ErrorMessage.jsx
+│   ├── layout/          
+│   │   ├── Header.jsx    # 從原本的 components/Header.jsx 移動
+│   │   ├── Footer.jsx    # 從原本的 components/Footer.jsx 移動
+│   │   └── Sidebar.jsx   # 從原本的 components/Category/CategorySidebar.jsx 移動
+│   └── form/            
+│       ├── TextField.jsx
+│       └── SelectField.jsx
 │
-├── features/              # 功能模組
-│   ├── auth/             # 認證相關
+├── features/             # 功能模組
+│   ├── auth/            # 認證相關
+│   │   ├── components/
+│   │   │   ├── LoginForm.jsx     # 從原本的 pages/Sign.jsx 拆分
+│   │   │   └── RegisterForm.jsx  # 從原本的 pages/Register.jsx 拆分
 │   │   ├── hooks/
-│   │   ├── services/
-│   │   ├── LoginForm.jsx
-│   │   └── RegisterForm.jsx
-│   ├── posts/            # 文章相關
-│   ├── profile/          # 個人資料相關
+│   │   │   └── useAuth.js        # 從原本的 contexts/AuthContext.jsx 拆分
+│   │   └── services/
+│   │       └── authService.js     # 處理認證相關的 API 呼叫
+│   │
+│   ├── posts/           # 文章相關
+│   │   ├── components/
+│   │   │   ├── PostCard.jsx      # 從原本的 components/Post/PostCard.jsx 移動
+│   │   │   ├── PostHeader.jsx    # 從原本的 components/Post/PostHeader.jsx 移動
+│   │   │   ├── PostContent.jsx   # 從原本的 components/Post/PostContent.jsx 移動
+│   │   │   └── PostActions.jsx   # 從原本的 components/Post/PostActions.jsx 移動
+│   │   ├── hooks/
+│   │   │   └── usePost.js        # 新增: 處理文章相關的邏輯
+│   │   └── services/
+│   │       └── postService.js     # 處理文章相關的 API 呼叫
+│   │
+│   └── profile/         # 個人資料相關
+│       ├── components/
+│       │   ├── ProfileHeader.jsx  # 從原本的 components/Profile/ProfileHeader.jsx 移動
+│       │   └── ProfilePosts.jsx   # 從原本的 components/Profile/ProfilePostsList.jsx 移動
+│       └── services/
+│           └── profileService.js   # 處理個人資料相關的 API 呼叫
 │
-├── hooks/                # 全局共用 hooks
+├── hooks/               # 全局共用 hooks
+│   ├── useTheme.js      # 從原本的 contexts/themeContext.jsx 拆分
+│   └── useScrollToTop.js # 新增: 處理回到頂部功能
 │
-├── services/             # API 服務 (全局)
-│   ├── api.js
-│   ├── firebase.js
-│   ├── authService.js
-│   ├── postService.js
-│   └── userService.js
+├── services/            # API 服務
+│   ├── firebase.js      # 從原本的 utils/firebase.js 移動
+│   ├── api.js          # 新增: API 請求的基礎配置
+│   └── storage.js      # 新增: 處理檔案上傳相關
 │
-├── utils/                # 工具函數
+├── utils/              # 工具函數
+│   ├── dateFormat.js   # 新增: 處理日期格式化
+│   ├── validation.js   # 新增: 表單驗證
+│   └── imageUtils.js   # 從原本的 utils/imageUtils.js 移動
 │
-├── constants/            # 常量定義
+├── constants/          # 常量定義
+│   ├── routes.js       # 從原本的 routes.js 移動
+│   └── config.js       # 新增: 應用配置常量
 │
-├── contexts/             # Context API
+├── contexts/           # Context API
+│   ├── AuthContext.jsx # 從原本的 contexts/AuthContext.jsx 移動
+│   └── ThemeContext.jsx # 從原本的 contexts/themeContext.jsx 移動
 │
-├── store/                # Redux/Zustand 狀態管理 (可選)
-│   ├── authSlice.js
-│   ├── postSlice.js
-│   └── store.js
-│
-├── pages/                # 頁面組件
+├── pages/             # 頁面組件
 │   ├── Home/
+│   │   ├── index.jsx   # 從原本的 pages/HomePage.jsx 移動
+│   │   └── components/ # Home 頁面專用組件
 │   ├── Profile/
-│   ├── Admin/
+│   │   └── index.jsx   # 從原本的 pages/Profile.jsx 移動
+│   └── Admin/
+│       └── index.jsx   # 從原本的 pages/AdminPanel.jsx 移動
 │
-├── layouts/              # 頁面布局
-│   ├── MainLayout.jsx
-│   ├── AdminLayout.jsx
-│   └── AuthLayout.jsx
+├── layouts/           # 頁面布局
+│   ├── MainLayout.jsx  # 新增: 包含 Header 和 Footer 的主要布局
+│   ├── AdminLayout.jsx # 新增: 管理後台布局
+│   └── AuthLayout.jsx  # 新增: 登入/註冊頁面布局
 │
 ├── App.jsx
 └── main.jsx
