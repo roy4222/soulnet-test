@@ -48,52 +48,74 @@ npm install browser-image-compression
 
 ```bash
 C:.
-├── App.jsx                # 應用程式主入口
-├── main.jsx              # React 渲染入口
+├── src/                  # 源碼目錄
+│   ├── App.jsx          # 應用程式主入口
+│   ├── main.jsx         # React 渲染入口
+│   │
+│   ├── assets/          # 靜態資源
+│   │   ├── icons/       # 圖標文件
+│   │   ├── images/      # 圖片資源
+│   │   └── styles/      # 樣式文件
+│   │       └── global.css
+│   │
+│   ├── components/      # 共用元件
+│   │   ├── Header.jsx   # 頁面頭部
+│   │   ├── Footer.jsx   # 頁面底部
+│   │   ├── ScrollToTopButton.jsx
+│   │   │
+│   │   ├── Post/       # 文章相關元件
+│   │   │   ├── PostCard.jsx
+│   │   │   ├── PostHeader.jsx
+│   │   │   ├── PostContent.jsx
+│   │   │   ├── PostActions.jsx
+│   │   │   ├── PostForm.jsx
+│   │   │   ├── ImageUploader.jsx
+│   │   │   ├── ImagePreview.jsx
+│   │   │   ├── ImagePreviewList.jsx
+│   │   │   ├── PostCommentForm.jsx
+│   │   │   ├── PostCommentsList.jsx
+│   │   │   └── PostInteractionButtons.jsx
+│   │   │
+│   │   ├── Profile/    # 個人資料相關元件
+│   │   │   ├── ProfileHeader.jsx
+│   │   │   ├── ProfileTabs.jsx
+│   │   │   └── ProfilePostsList.jsx
+│   │   │
+│   │   └── UI/         # 基礎 UI 元件
+│   │       ├── BackButton.jsx
+│   │       ├── LoadingState.jsx
+│   │       ├── SuccessMessage.jsx
+│   │       └── ImageModal.jsx
+│   │
+│   ├── contexts/       # Context API
+│   │   ├── AuthContext.jsx
+│   │   └── ThemeContext.jsx
+│   │
+│   ├── pages/         # 頁面組件
+│   │   ├── HomePage.jsx
+│   │   ├── Sign.jsx
+│   │   ├── Register.jsx
+│   │   ├── NewPost.jsx
+│   │   ├── Post.jsx
+│   │   ├── EditPost.jsx
+│   │   ├── Profile.jsx
+│   │   ├── AdminPanel.jsx
+│   │   └── ResetPassword.jsx
+│   │
+│   ├── utils/         # 工具函數
+│   │   ├── firebase.js
+│   │   ├── imageUtils.js
+│   │   ├── r2Config.js
+│   │   └── ShareUtils.js
+│   │
+│   └── routes.js      # 路由配置
 │
-├── assets/               # 靜態資源
-│   ├── icons/           # 圖標文件
-│   ├── images/          # 圖片資源
-│   └── styles/          # 樣式文件
-│       └── global.css   # 全局樣式
+├── public/            # 公開資源
+│   ├── index.html
+│   └── favicon.ico
 │
-├── components/           # 共用元件
-│   ├── Post/            # 文章相關元件
-│   │   ├── PostForm.jsx
-│   │   ├── ImageUploader.jsx
-│   │   └── ImagePreviewList.jsx
-│   ├── Profile/         # 個人資料相關元件
-│   │   └── ProfilePostsList.jsx
-│   └── UI/              # 基礎 UI 元件
-│       ├── BackButton.jsx
-│       ├── LoadingState.jsx
-│       └── SuccessMessage.jsx
-│
-├── contexts/            # Context API
-│   ├── AuthContext.jsx
-│   └── ThemeContext.jsx
-│
-├── features/           # 功能模組
-│   ├── auth/          # 認證相關功能
-│   │   ├── components/
-│   │   │   └── PasswordStrength/
-│   │   └── hooks/
-│   │       └── useAuth.js
-│   └── posts/         # 文章相關功能
-│       ├── components/
-│       └── hooks/
-│           └── usePost.js
-│
-├── pages/             # 頁面組件
-│   ├── HomePage.jsx
-│   ├── NewPost.jsx
-│   ├── EditPost.jsx
-│   └── ResetPassword.jsx
-│
-└── utils/            # 工具函數
-    ├── firebase.js
-    └── imageUtils.js
-```
+├── package.json
+└── README.md
 
 ## 4. 設置 Firebase
 
