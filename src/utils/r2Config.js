@@ -14,9 +14,8 @@ export const r2Config = {
   forcePathStyle: true  // 使用路徑樣式訪問
 };
 
-// 初始化並導出 R2 客戶端實例
-// 使用上面的配置創建一個新的 S3 客戶端
-export const r2Client = new S3Client(r2Config);
+// 初始化 R2 客戶端
+export const r2Client = new S3Client(r2Config);  // 直接傳入配置對象
 
 // 圖片上傳相關配置
 export const imageConfig = {
@@ -36,4 +35,17 @@ export const cacheConfig = {
   public: 'public, max-age=31536000',  // 公共緩存,保存一年
   private: 'private, no-cache',         // 私有緩存,不緩存
   none: 'no-store'                      // 禁止緩存
+};
+
+export const uploadWithRetry = async (file, folder, maxRetries = 3) => {
+  let retries = 0;
+  while (retries < maxRetries) {
+    try {
+      return await uploadImageToR2(file, folder);
+    } catch (error) {
+      retries++;
+      if (retries === maxRetries) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+    }
+  }
 };
