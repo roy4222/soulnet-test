@@ -38,6 +38,10 @@ npm install classnames
 
 # 工具類
 npm install date-fns
+
+# 前端圖片壓縮工具
+npm install browser-image-compression 
+
 ```
 
 ## 3. 建立專案結構
@@ -130,417 +134,291 @@ C:.
    export const db = getFirestore(app);
    export const storage = getStorage(app);
    ```
-4. 設置 Cloudflare R2 相關的服務和工具:
 
-R2 是 Cloudflare 的物件存儲服務，需考慮安全性、上傳功能、錯誤處理、緩存策略和環境配置。
 
-首先在專案根目錄創建 `.env` 文件:
+# 4.實作步驟
 
-```bash
-VITE_R2_ACCOUNT_ID=your_account_id
-VITE_R2_ACCESS_KEY_ID=your_access_key_id  
-VITE_R2_SECRET_ACCESS_KEY=your_secret_access_key
-VITE_R2_BUCKET_NAME=your_bucket_name
-VITE_R2_PUBLIC_URL=your_public_url
-VITE_R2_ENDPOINT=your_endpoint
+### 1. 基礎設置與工具
+
+```
+src/utils/
+├── firebase.js      # Firebase 配置
+└── imageUtils.js    # 圖片處理工具
+
 ```
 
-然後創建 R2 服務:
+改進建議：
 
-```javascript
-// src/services/r2Service.js
-import { S3Client } from '@aws-sdk/client-s3';
-import { Upload } from '@aws-sdk/lib-storage';
+- 將 R2 相關配置從 `firebase.js` 分離出來，建立 `r2Config.js`
+- 在 `imageUtils.js` 中添加圖片壓縮功能
+- 添加圖片格式驗證
 
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${import.meta.env.VITE_R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: import.meta.env.VITE_R2_ACCESS_KEY_ID,
-    secretAccessKey: import.meta.env.VITE_R2_SECRET_ACCESS_KEY,
-  }
-});
+### 2. 路由和頁面結構
 
-export const uploadFileToR2 = async (file, path = '') => {
-  const key = `${path}${Date.now()}-${file.name}`;
-  const upload = new Upload({
-    client: r2Client,
-    params: {
-      Bucket: import.meta.env.VITE_R2_BUCKET_NAME,
-      Key: key,
-      Body: file,
-      ContentType: file.type,
+```
+export const ROUTES = {
+    HOME: '/',
+    SIGN: '/sign',
+    REGISTER: '/register',
+    NEW_POST: '/NewPost',
+    POST_DETAIL: '/post/:id',
+    EDIT_POST: '/edit-post/:id',
+    PROFILE: '/profile',
+    ADMIN: '/admin',
+    RESET_PASSWORD: '/reset-password'
+};
+
+// 定義路由配置
+export const routes = [
+    {
+        path: ROUTES.HOME,
+        element: HomePage,
+        title: '首頁'
     },
-  });
-  await upload.done();
-  return { url: `${import.meta.env.VITE_R2_PUBLIC_URL}/${key}`, key };
-};
-
-export const deleteFileFromR2 = async (key) => {
-  await r2Client.deleteObject({
-    Bucket: import.meta.env.VITE_R2_BUCKET_NAME,
-    Key: key
-  });
-};
-
-export const getR2FileUrl = (key) => 
-  key ? `${import.meta.env.VITE_R2_PUBLIC_URL}/${key}` : null;
-```
-
-創建上傳 Hook:
-
-```javascript
-// src/hooks/useR2Upload.js
-import { useState } from 'react';
-import { uploadFileToR2 } from '../services/r2Service';
-
-export const useR2Upload = () => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState(null);
-  const [progress, setProgress] = useState(0);
-
-  const upload = async (file, path = '') => {
-    try {
-      setIsUploading(true);
-      setError(null);
-      setProgress(0);
-      if (file.size > 5 * 1024 * 1024) throw new Error('File size exceeds 5MB limit');
-      if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) 
-        throw new Error('Invalid file type');
-      const result = await uploadFileToR2(file, path);
-      setProgress(100);
-      return result;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setIsUploading(false);
+    {
+        path: ROUTES.SIGN,
+        element: Sign,
+        title: '登入'
+    },
+    {
+        path: ROUTES.REGISTER,
+        element: Register,
+        title: '註冊'
+    },
+    {
+        path: ROUTES.NEW_POST,
+        element: NewPost,
+        title: '發表文章'
+    },
+    {
+        path: ROUTES.POST_DETAIL,
+        element: Post,
+        title: '文章詳情'
+    },
+    {
+        path: ROUTES.EDIT_POST,
+        element: EditPost,
+        title: '編輯文章'
+    },
+    {
+        path: ROUTES.PROFILE,
+        element: Profile,
+        title: '個人資料'
+    },
+    {
+        path: ROUTES.ADMIN,
+        element: AdminPanel,
+        title: '管理員面板'
+    },
+    {
+        path: ROUTES.RESET_PASSWORD,
+        element: ResetPassword,
+        title: '重設密碼'
     }
-  };
+];
 
-  return { upload, isUploading, error, progress };
-};
 ```
 
-使用示例:
+改進建議：
 
-```javascript
-// src/components/ImageUpload.jsx
-import { useR2Upload } from '../hooks/useR2Upload';
+- 添加路由守衛功能
+- 實作延遲加載（Code Splitting）
+- 添加錯誤邊界頁面
 
-export const ImageUpload = () => {
-  const { upload, isUploading, error, progress } = useR2Upload();
+### 3. 功能模組化
 
-  const handleFileChange = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    try {
-      const { url } = await upload(file, 'images/');
-      console.log('Uploaded file URL:', url);
-    } catch (err) {
-      console.error('Upload failed:', err);
-    }
-  };
+需要將現有功能拆分為以下模組：
 
-  return (
-    <div>
-      <input type="file" accept="image/*" onChange={handleFileChange} disabled={isUploading} />
-      {isUploading && <progress value={progress} max="100" />}
-      {error && <p className="text-red-500">{error}</p>}
-    </div>
-  );
-};
+```
+src/features/
+├── auth/           # 認證相關
+│   ├── hooks/
+│   │   └── useAuth.js
+│   └── services/
+│       └── authService.js
+│
+├── posts/          # 文章相關
+│   ├── hooks/
+│   │   ├── usePost.js
+│   │   └── usePostForm.js
+│   └── services/
+│       └── postService.js
+│
+└── profile/        # 個人資料相關
+    ├── hooks/
+    │   └── useProfile.js
+    └── services/
+        └── profileService.js
+
 ```
 
-工具函數:
+### 4. 共用組件改進
 
-```javascript
-// src/utils/r2Utils.js
-export const getImageUrl = (key) => 
-  !key ? null : key.startsWith('http') ? key : `${import.meta.env.VITE_R2_PUBLIC_URL}/${key}`;
+從現有代碼中提取：
 
-export const getFileNameFromUrl = (url) => 
-  url ? url.split('/').pop() : '';
-
-export const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-};
 ```
-
-這配置提供了安全性、功能完整性、良好用戶體驗、可維護性和擴展性。
-
-### 1. 認證系統
-
-實現認證相關功能：
-
-```javascript
-// src/features/auth/services/authService.js
-import { 
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
-  signOut
-} from 'firebase/auth';
-import { auth, db } from '../../../utils/firebase';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-
-export const authService = {
-  // 註冊
-  async register(email, password, displayName) {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    await setDoc(doc(db, 'users', userCredential.user.uid), {
-      displayName,
-      email,
-      createdAt: new Date(),
-      photoURL: null,
-      bio: ''
-    });
-    return userCredential.user;
-  },
-
-  // 登入
-  async login(email, password) {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
-  },
-
-  // Google 登入
-  async googleLogin() {
-    const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
-    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-    if (!userDoc.exists()) {
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
-        displayName: userCredential.user.displayName,
-        email: userCredential.user.email,
-        photoURL: userCredential.user.photoURL,
-        createdAt: new Date(),
-        bio: ''
-      });
-    }
-    return userCredential.user;
-  },
-
-  // 登出
-  async logout() {
-    await signOut(auth);
-  }
-};
-```
-
-### 2. 文章系統
-
-實現文章相關功能：
-
-```javascript
-// src/features/posts/services/postService.js
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  query, 
-  where,
-  orderBy,
-  limit,
-  startAfter
-} from 'firebase/firestore';
-import { db } from '../../../utils/firebase';
-import { uploadFileToR2 } from '../../../services/r2Service';
-
-export const postService = {
-  // 創建文章
-  async createPost({ title, content, images, category, authorId }) {
-    const imageUrls = await Promise.all(
-      images.map(image => uploadFileToR2(image, 'posts/'))
-    );
-    const post = await addDoc(collection(db, 'posts'), {
-      title,
-      content,
-      imageUrls: imageUrls.map(img => img.url),
-      category,
-      authorId,
-      createdAt: new Date(),
-      likes: [],
-      comments: []
-    });
-    return post;
-  },
-
-  // 獲取文章列表
-  async getPosts({ category = 'all', page = 1, limit: pageLimit = 10 }) {
-    const postsRef = collection(db, 'posts');
-    let postsQuery = query(
-      postsRef,
-      orderBy('createdAt', 'desc'),
-      limit(pageLimit)
-    );
-    if (category !== 'all') {
-      postsQuery = query(
-        postsQuery,
-        where('category', '==', category)
-      );
-    }
-    const snapshot = await getDocs(postsQuery);
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-  }
-};
-```
-
-### 3. 用戶系統
-
-實現用戶相關功能：
-
-```javascript
-// src/features/profile/services/userService.js
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { db } from '../../../utils/firebase';
-import { uploadFileToR2 } from '../../../services/r2Service';
-
-export const userService = {
-  // 更新個人資料
-  async updateProfile(userId, data) {
-    const userRef = doc(db, 'users', userId);
-    if (data.avatar) {
-      const { url } = await uploadFileToR2(data.avatar, 'avatars/');
-      data.photoURL = url;
-      delete data.avatar;
-    }
-    await updateDoc(userRef, data);
-  },
-
-  // 獲取用戶資料
-  async getUserProfile(userId) {
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    if (!userDoc.exists()) {
-      throw new Error('User not found');
-    }
-    return {
-      id: userDoc.id,
-      ...userDoc.data()
-    };
-  }
-};
-```
-
-### 4. UI/UX 設計
-
-建立基本的 UI 組件：
-
-```javascript
-// src/components/common/Button/Button.jsx
-import { forwardRef } from 'react';
-import classNames from 'classnames';
-
-export const Button = forwardRef(({
-  children,
-  variant = 'primary',
-  size = 'md',
-  disabled,
-  loading,
-  className,
-  ...props
-}, ref) => {
-  const baseStyles = 'inline-flex items-center justify-center rounded-md font-medium';
-  const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-  };
-  const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg'
-  };
-
-  return (
-    <button
-      ref={ref}
-      className={classNames(
-        baseStyles,
-        variants[variant],
-        sizes[size],
-        disabled && 'opacity-50 cursor-not-allowed',
-        className
-      )}
-      disabled={disabled || loading}
-      {...props}
-    >
-      {loading && (
-        <span className="mr-2">
-          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-            {/* Loading spinner SVG */}
-          </svg>
-        </span>
-      )}
-      {children}
-    </button>
-  );
-});
-```
-
-### 5. 部署配置
-
-建立部署配置文件：
-
-```javascript
-// vite.config.js
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  plugins: [react()],
-  build: {
-    outDir: 'dist',
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore']
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        // 只驗證分類
+        if (!category) {
+            setError('請選擇一個分類');
+            return;
         }
+
+        setLoading(true);
+        setError('');
+
+        try {
+            // 上傳所有圖片並獲取URLs
+            const imageUrls = [];
+            if (images.length > 0) {
+                // 並行上傳所有圖片
+                const uploadPromises = images.map(image => uploadImageToR2(image, r2Client));
+                const urls = await Promise.all(uploadPromises);
+                imageUrls.push(...urls);
+            }
+
+            // 獲取 Firestore 實例
+            const postsRef = collection(db, 'posts');
+
+            // 創建新文章文檔，標題和內容可為空
+            const postData = {
+                imageUrls: imageUrls, // 使用圖片URL數組
+                title: title.trim() || '',
+                content: content.replace(/\\n/g, '\\n') || '',
+                category: category,
+                createdAt: serverTimestamp(),
+                author: {
+                    displayName: auth.currentUser.displayName || '匿名用戶',
+                    photoURL: auth.currentUser.photoURL || null,
+                    uid: auth.currentUser.uid,
+                    email: auth.currentUser.email
+                }
+            };
+
+            await addDoc(postsRef, postData);
+
+            // 發布成功後導航到首頁
+            navigate('/');
+        } catch (error) {
+            console.error('發文失敗:', error);
+            setError('發文失敗，請稍後再試');
+            setLoading(false);
+        }
+    };
+
+```
+
+需要建立：
+
+```
+src/components/
+├── UI/
+│   ├── ImageUploader/
+│   │   ├── index.jsx
+│   │   └── ImagePreview.jsx
+│   └── Form/
+│       ├── TextField.jsx
+│       └── PasswordField.jsx
+└── Post/
+    ├── PostForm/
+    │   ├── index.jsx
+    │   └── validation.js
+    └── PostActions/
+        ├── index.jsx
+        └── handlers.js
+
+```
+
+### 5. 資料處理邏輯優化
+
+需要改進的部分：
+
+1. 圖片刪除邏輯：
+
+```
+  const handleDelete = async () => {
+    if (!canModify()) return;
+
+    if (window.confirm('確定要刪除這篇文章嗎？此操作無法撤銷。')) {
+      try {
+        // 1. 記錄需要刪除的圖片 URL（但不從前端刪除）
+        const imageUrls = post.imageUrls?.length > 0 ? post.imageUrls : (post.imageUrl ? [post.imageUrl] : []);
+
+        if (imageUrls.length > 0) {
+          console.log('需要刪除的圖片 URL:', imageUrls);
+          // 注意：從前端直接刪除 R2 圖片會遇到 CORS 和安全憑證問題
+          // 需要設置後端 API 或 Cloud Functions 來處理圖片刪除
+        }
+
+        // 2. 查詢並刪除所有相關的轉發文章
+        const repostsQuery = query(collection(db, 'posts'), where('originalPostId', '==', post.id));
+        const repostsSnapshot = await getDocs(repostsQuery);
+
+        // 刪除所有轉發文章
+        const deleteRepostsPromises = repostsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deleteRepostsPromises);
+        console.log(`已刪除 ${repostsSnapshot.docs.length} 篇相關轉發文章`);
+
+        // 3. 最後刪除原文章
+        await deleteDoc(doc(db, 'posts', post.id));
+        alert('文章已成功刪除');
+        navigate('/');
+      } catch (error) {
+        console.error('Error deleting post:', error);
+        alert('刪除文章時發生錯誤');
       }
     }
-  },
-  server: {
-    port: 3000
-  }
-});
+  };
+
 ```
 
-### 6. 下一步建議
+1. 文章更新邏輯：
 
-1. 實現頁面路由
-   - 設置受保護的路由
-   - 實現路由守衛
+```
+      const updateData = {
+        title,
+        content,
+        category,
+        updatedAt: Timestamp.now()
+      };
 
-2. 加入狀態管理
-   - 考慮使用 Redux 或 Zustand
-   - 實現數據持久化
+      // 添加圖片URLs到更新數據中
+      if (post.imageURL && allImageUrls.length > 0) {
+        // 如果原來是單圖片格式，現在轉為多圖片格式
+        delete updateData.imageURL;
+        updateData.imageUrls = allImageUrls;
 
-3. 優化用戶體驗
-   - 加入載入狀態
-   - 實現錯誤處理
-   - 添加動畫效果
+```
 
-4. 實現社交功能
-   - 關注系統
-   - 評論系統
-   - 通知系統
+### 6. 安全性和效能優化
 
-5. 性能優化
-   - 實現懶加載
-   - 優化圖片加載
-   - 實現無限滾動
+需要添加：
 
-6. 測試
-   - 單元測試
-   - 集成測試
-   - E2E 測試
+1. 請求限制（Rate Limiting）
+2. 圖片上傳大小限制
+3. 添加錯誤追蹤
+4. 實作快取機制
+
+### 7. 測試架構
+
+建立測試目錄：
+
+```
+src/__tests__/
+├── unit/
+│   ├── utils/
+│   └── hooks/
+└── integration/
+    ├── auth/
+    └── posts/
+
+```
+
+這個實作順序確保了：
+
+1. 基礎設施先到位
+2. 功能模組化清晰
+3. 共用組件可重用
+4. 業務邏輯集中管理
+5. 測試覆蓋完整
