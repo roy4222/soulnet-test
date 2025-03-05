@@ -1,11 +1,20 @@
-// 引入頁面組件
+/**
+ * 路由配置文件
+ * 包含所有頁面路由的定義和配置
+ */
+
+// 引入 React 的 lazy 和 Suspense 用於代碼分割和延遲加載
 import { lazy, Suspense } from 'react';
+// 引入載入中和錯誤邊界組件
 import LoadingFallback from './components/UI/LoadingFallback';
 import ErrorBoundary from './components/UI/ErrorBoundary';
 
-// 使用 lazy 動態導入頁面組件
+/**
+ * 使用 lazy 動態導入頁面組件
+ * 這樣可以實現代碼分割,提高首次載入速度
+ */
 const Sign = lazy(() => import('./pages/Sign'));
-const Register = lazy(() => import('./pages/Register'));
+const Register = lazy(() => import('./pages/Register')); 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const NewPost = lazy(() => import('./pages/NewPost'));
 const Post = lazy(() => import('./pages/Post'));
@@ -16,11 +25,15 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const ImageManager = lazy(() => import('./pages/ImageManager'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-// 定義路由路徑常量
+/**
+ * 路由路徑常量
+ * 集中管理所有路由路徑,方便維護和引用
+ * @constant {Object} ROUTES
+ */
 export const ROUTES = {
     HOME: '/',
     SIGN: '/sign',
-    REGISTER: '/register',
+    REGISTER: '/register', 
     NEW_POST: '/new-post',
     POST_DETAIL: '/post/:id',
     EDIT_POST: '/edit-post/:id',
@@ -30,7 +43,12 @@ export const ROUTES = {
     RESET_PASSWORD: '/reset-password'
 };
 
-// 包裝組件以添加 Suspense 和 ErrorBoundary
+/**
+ * 包裝組件以添加 Suspense 和 ErrorBoundary
+ * @param {React.Component} Component - 要包裝的組件
+ * @param {string} title - 頁面標題,用於載入狀態顯示
+ * @returns {React.Element} 包裝後的組件
+ */
 const withSuspense = (Component, title) => (
   <ErrorBoundary>
     <Suspense fallback={<LoadingFallback title={title} />}>
@@ -39,7 +57,16 @@ const withSuspense = (Component, title) => (
   </ErrorBoundary>
 );
 
-// 定義路由配置
+/**
+ * 路由配置數組
+ * 定義每個路由的路徑、組件、標題和訪問權限
+ * @property {string} path - 路由路徑
+ * @property {React.Component} element - 對應的頁面組件
+ * @property {string} title - 頁面標題
+ * @property {boolean} public - 是否為公開路由
+ * @property {boolean} auth - 是否需要登入
+ * @property {boolean} admin - 是否需要管理員權限
+ */
 export const routes = [
     {
         path: ROUTES.HOME,
@@ -109,5 +136,5 @@ export const routes = [
     }
 ];
 
-// 導出所有路由配置
+// 導出路由配置供其他文件使用
 export default routes;
