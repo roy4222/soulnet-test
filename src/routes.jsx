@@ -5,9 +5,28 @@
 
 // 引入 React 的 lazy 和 Suspense 用於代碼分割和延遲加載
 import { lazy, Suspense } from 'react';
+import { Outlet } from 'react-router-dom';
 // 引入載入中和錯誤邊界組件
 import LoadingFallback from './components/UI/LoadingFallback';
 import ErrorBoundary from './components/UI/ErrorBoundary';
+import Header from './components/Header';
+import Footer from './components/Footer';
+
+/**
+ * 根佈局組件
+ * @returns {React.Element} 根佈局組件
+ */
+const RootLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col dark:bg-gray-900 dark:text-white">
+      <Header />
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  );
+};
 
 /**
  * 使用 lazy 動態導入頁面組件
@@ -68,72 +87,78 @@ const withSuspense = (Component, title) => (
  * @property {boolean} admin - 是否需要管理員權限
  */
 export const routes = [
-    {
-        path: ROUTES.HOME,
+  {
+    path: '/',
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
         element: withSuspense(HomePage, '首頁'),
         title: '首頁',
-        public: true // 公開路由
-    },
-    {
+        public: true
+      },
+      {
         path: ROUTES.SIGN,
         element: withSuspense(Sign, '登入'),
         title: '登入',
         public: true
-    },
-    {
+      },
+      {
         path: ROUTES.REGISTER,
         element: withSuspense(Register, '註冊'),
         title: '註冊',
         public: true
-    },
-    {
+      },
+      {
         path: ROUTES.NEW_POST,
         element: withSuspense(NewPost, '發表文章'),
         title: '發表文章',
-        auth: true // 需要登入
-    },
-    {
+        auth: true
+      },
+      {
         path: ROUTES.POST_DETAIL,
         element: withSuspense(Post, '文章詳情'),
         title: '文章詳情',
         public: true
-    },
-    {
+      },
+      {
         path: ROUTES.EDIT_POST,
         element: withSuspense(EditPost, '編輯文章'),
         title: '編輯文章',
         auth: true
-    },
-    {
+      },
+      {
         path: ROUTES.PROFILE,
         element: withSuspense(Profile, '個人資料'),
         title: '個人資料',
         auth: true
-    },
-    {
+      },
+      {
         path: ROUTES.ADMIN,
         element: withSuspense(AdminPanel, '管理員面板'),
         title: '管理員面板',
-        admin: true // 需要管理員權限
-    },
-    {
+        admin: true
+      },
+      {
         path: ROUTES.IMAGE_MANAGER,
         element: withSuspense(ImageManager, '圖片管理'),
         title: '圖片管理',
         admin: true
-    },
-    {
+      },
+      {
         path: ROUTES.RESET_PASSWORD,
         element: withSuspense(ResetPassword, '重設密碼'),
         title: '重設密碼',
         public: true
-    },
-    {
+      },
+      {
         path: '*',
         element: withSuspense(NotFound, '404頁面未找到'),
         title: '404頁面未找到',
         public: true
-    }
+      }
+    ]
+  }
 ];
 
 // 導出路由配置供其他文件使用
