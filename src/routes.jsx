@@ -70,71 +70,71 @@ const withSuspense = (Component, title) => (
 export const routes = [
     {
         path: ROUTES.HOME,
-        element: HomePage,
+        element: withSuspense(HomePage, '首頁'),
         title: '首頁',
         public: true // 公開路由
     },
     {
         path: ROUTES.SIGN,
-        element: Sign,
+        element: withSuspense(Sign, '登入'),
         title: '登入',
         public: true
     },
     {
         path: ROUTES.REGISTER,
-        element: Register,
+        element: withSuspense(Register, '註冊'),
         title: '註冊',
         public: true
     },
     {
         path: ROUTES.NEW_POST,
-        element: NewPost,
+        element: withSuspense(NewPost, '發表文章'),
         title: '發表文章',
         auth: true // 需要登入
     },
     {
         path: ROUTES.POST_DETAIL,
-        element: Post,
+        element: withSuspense(Post, '文章詳情'),
         title: '文章詳情',
         public: true
     },
     {
         path: ROUTES.EDIT_POST,
-        element: EditPost,
+        element: withSuspense(EditPost, '編輯文章'),
         title: '編輯文章',
         auth: true
     },
     {
         path: ROUTES.PROFILE,
-        element: Profile,
+        element: withSuspense(Profile, '個人資料'),
         title: '個人資料',
         auth: true
     },
     {
         path: ROUTES.ADMIN,
-        element: AdminPanel,
+        element: withSuspense(AdminPanel, '管理員面板'),
         title: '管理員面板',
         admin: true // 需要管理員權限
     },
     {
         path: ROUTES.IMAGE_MANAGER,
-        element: ImageManager,
+        element: withSuspense(ImageManager, '圖片管理'),
         title: '圖片管理',
         admin: true
     },
     {
         path: ROUTES.RESET_PASSWORD,
-        element: ResetPassword,
+        element: withSuspense(ResetPassword, '重設密碼'),
         title: '重設密碼',
         public: true
     },
     {
         path: '*',
-        element: NotFound,
+        element: withSuspense(NotFound, '404頁面未找到'),
         title: '404頁面未找到',
         public: true
     }
 ];
 
 // 導出路由配置供其他文件使用
-export default routes;
+export default routes; 
