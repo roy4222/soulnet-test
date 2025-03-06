@@ -119,16 +119,21 @@ export function AuthProvider({ children }) {
 
   /**
    * 更新用戶密碼
-   * @param {string} currentPassword - 當前密碼
-   * @param {string} newPassword - 新密碼
-   * @returns {Promise<boolean>} 更新結果
+   * 先重新驗證用戶身份，然後更新密碼
+   * @param {string} currentPassword - 當前密碼，用於重新驗證用戶身份
+   * @param {string} newPassword - 要設置的新密碼
+   * @returns {Promise<boolean>} 更新結果，成功返回true，失敗則拋出錯誤
+   * @throws {Error} 當用戶未登入、驗證失敗或密碼更新失敗時拋出錯誤
    */
   const updateUserPassword = async (currentPassword, newPassword) => {
     try {
+      // 檢查用戶是否已登入
       if (!currentUser) {
         throw new Error('沒有登入的用戶');
       }
+      // 先進行身份重新驗證
       await reauthenticateUser(currentPassword);
+      // 更新用戶密碼
       await updatePassword(currentUser, newPassword);
       return true;
     } catch (error) {
