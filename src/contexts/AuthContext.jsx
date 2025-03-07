@@ -21,7 +21,8 @@ import {
   setPersistence,
   browserLocalPersistence,
   browserSessionPersistence,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  signInWithRedirect
 } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
@@ -30,6 +31,11 @@ const AuthContext = createContext();
 
 // 創建 Google 提供者實例
 const googleProvider = new GoogleAuthProvider();
+// 設定 Google 登入選項
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+  display: 'popup'
+});
 
 /**
  * AuthProvider 組件 - 提供身份驗證相關的狀態和方法
@@ -99,8 +105,18 @@ export function AuthProvider({ children }) {
   const googleLogin = async (rememberMe = false) => {
     try {
       await setPersistenceType(rememberMe);
-      return await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      // 確保關閉彈出視窗
+      if (window.opener) {
+        window.close();
+      }
+      return result;
     } catch (error) {
+      console.error('Google 登入失敗:', error);
+      // 如果是彈出視窗被阻擋，嘗試使用重定向方式
+      if (error.code === 'auth/popup-blocked') {
+        return await signInWithRedirect(auth, googleProvider);
+      }
       throw error;
     }
   };
