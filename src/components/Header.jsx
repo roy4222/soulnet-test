@@ -6,6 +6,7 @@ import defaultAvatar from '../assets/images/images.webp';
 import MobileMenu from './MobileMenu';
 import Sidebar from './Sidebar';
 import { NAV_LINKS } from '../config/navLinks';
+import logoImage from '../assets/icons/logo.webp';
 
 const Header = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -81,8 +82,15 @@ const Header = () => {
                   )}
                 </svg>
               </button>
-              <Link to="/" className="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                SoulNet
+              <Link to="/" className="flex items-center space-x-2">
+                <img 
+                  src={logoImage}
+                  alt="SoulNet Logo"
+                  className="h-8 w-8"
+                />
+                <span className="text-xl font-bold text-gray-800 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  SoulNet
+                </span>
               </Link>
             </div>
 
