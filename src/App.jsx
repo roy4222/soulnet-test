@@ -1,6 +1,7 @@
 import React from 'react';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { routes } from './routes';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // 創建路由配置，並啟用 v7 的新特性
 const router = createBrowserRouter(routes, {
@@ -12,7 +13,11 @@ const router = createBrowserRouter(routes, {
 });
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+  );
 }
 
 export default App; 
