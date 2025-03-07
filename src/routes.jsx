@@ -11,6 +11,7 @@ import LoadingFallback from './components/UI/LoadingFallback';
 import ErrorBoundary from './components/UI/ErrorBoundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import { RouteGuard } from './components/RouteGuard';
 
 /**
  * 根佈局組件
@@ -66,12 +67,16 @@ export const ROUTES = {
  * 包裝組件以添加 Suspense 和 ErrorBoundary
  * @param {React.Component} Component - 要包裝的組件
  * @param {string} title - 頁面標題,用於載入狀態顯示
+ * @param {boolean} requireAuth - 是否需要登入
+ * @param {boolean} requireAdmin - 是否需要管理員權限
  * @returns {React.Element} 包裝後的組件
  */
-const withSuspense = (Component, title) => (
+const withSuspense = (Component, title, requireAuth = false, requireAdmin = false) => (
   <ErrorBoundary>
     <Suspense fallback={<LoadingFallback title={title} />}>
-      <Component />
+      <RouteGuard requireAuth={requireAuth} requireAdmin={requireAdmin}>
+        <Component />
+      </RouteGuard>
     </Suspense>
   </ErrorBoundary>
 );
@@ -111,7 +116,7 @@ export const routes = [
       },
       {
         path: ROUTES.NEW_POST,
-        element: withSuspense(NewPost, '發表文章'),
+        element: withSuspense(NewPost, '發表文章', true),
         title: '發表文章',
         auth: true
       },
@@ -123,25 +128,25 @@ export const routes = [
       },
       {
         path: ROUTES.EDIT_POST,
-        element: withSuspense(EditPost, '編輯文章'),
+        element: withSuspense(EditPost, '編輯文章', true),
         title: '編輯文章',
         auth: true
       },
       {
         path: ROUTES.PROFILE,
-        element: withSuspense(Profile, '個人資料'),
+        element: withSuspense(Profile, '個人資料', true),
         title: '個人資料',
         auth: true
       },
       {
         path: ROUTES.ADMIN,
-        element: withSuspense(AdminPanel, '管理員面板'),
+        element: withSuspense(AdminPanel, '管理員面板', true, true),
         title: '管理員面板',
         admin: true
       },
       {
         path: ROUTES.IMAGE_MANAGER,
-        element: withSuspense(ImageManager, '圖片管理'),
+        element: withSuspense(ImageManager, '圖片管理', true, true),
         title: '圖片管理',
         admin: true
       },
