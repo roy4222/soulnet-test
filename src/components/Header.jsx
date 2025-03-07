@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import defaultAvatar from '../assets/images/images.webp';
 
 const Header = () => {
   const { isDarkMode, toggleTheme } = useTheme();
@@ -45,17 +46,19 @@ const Header = () => {
                   </span>
                   {/* 用戶頭像區域 */}
                   <div className="relative">
-                    {/* 如果有頭像則顯示頭像,否則顯示用戶名首字母 */}
+                    {/* 如果有頭像則顯示頭像,否則顯示預設頭像 */}
                     {currentUser.photoURL ? (
                       <img
                         src={currentUser.photoURL}
                         alt="用戶頭像"
-                        className="w-8 h-8 rounded-full"
+                        className="w-8 h-8 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                        {(currentUser.displayName || '使用者')[0].toUpperCase()}
-                      </div>
+                      <img
+                        src={defaultAvatar}
+                        alt="預設頭像"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
                     )}
                     {/* 在線狀態指示器 */}
                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
