@@ -48,6 +48,22 @@ export function AuthProvider({ children }) {
   const [userRole, setUserRole] = useState(null);        // 用戶角色
   const [loading, setLoading] = useState(true);          // 載入狀態
   const [error, setError] = useState(null);              // 錯誤狀態
+  
+  // 新增側邊欄狀態
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    // 從 localStorage 讀取之前的狀態，預設為 false
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  // 切換側邊欄狀態
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(prev => {
+      const newState = !prev;
+      localStorage.setItem('sidebarCollapsed', JSON.stringify(newState));
+      return newState;
+    });
+  };
 
   /**
    * 設定登入持久性
@@ -304,7 +320,10 @@ export function AuthProvider({ children }) {
     handleAuthError,      // 處理身份驗證錯誤
     resetPassword,        // 發送重設密碼郵件
     loading,             // 載入狀態
-    error               // 錯誤訊息
+    error,               // 錯誤訊息
+    // 新增側邊欄相關的狀態和方法
+    isSidebarCollapsed,
+    toggleSidebar
   };
 
   // 回傳 AuthContext.Provider 組件，並傳入 value 物件
