@@ -43,7 +43,7 @@ const HomePage = () => {
       try {
         // 模擬資料載入
         await new Promise(resolve => setTimeout(resolve, 100));
-        setMessage({ type: 'success', content: '歡迎來到 SoulNet！' });
+        setMessage({ type: 'success'});
       } catch (error) {
         console.error('載入失敗:', error);
         setMessage({ type: 'error', content: '載入失敗，請重新整理頁面' });
