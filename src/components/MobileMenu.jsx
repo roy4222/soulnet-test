@@ -2,9 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-
-// 導航連結配置從 Header 組件中導入
-import { NAV_LINKS } from './Header';
+import { NAV_LINKS } from '../config/navLinks';
 
 const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);

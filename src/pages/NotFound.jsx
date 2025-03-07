@@ -10,10 +10,10 @@ const NotFound = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          系統維護中
+          系統開發中
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-          我們正在進行系統維護，請稍後再試
+          敬請期待
         </p>
         <Link
           to="/"
