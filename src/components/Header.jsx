@@ -203,13 +203,18 @@ const Header = () => {
 
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
-                      <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">
-                        {currentUser.displayName || '使用者'}
-                        {isAdmin() && (
-                          <span className="ml-2 text-xs px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300 rounded-full">
-                            管理員
-                          </span>
-                        )}
+                      <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                          {currentUser.displayName || '使用者'}
+                          {isAdmin() && (
+                            <span className="ml-2 text-xs px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300 rounded-full">
+                              管理員
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                          {currentUser.email}
+                        </div>
                       </div>
                       <Link
                         to="/profile"
