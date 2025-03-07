@@ -9,6 +9,8 @@ import defaultAvatar from '../../assets/images/images.webp';
 // 引入個人資料相關的子組件
 import ProfileHeader from './ProfileHeader';
 import ProfileCard from './ProfileCard';
+import LoadingState from '../UI/LoadingState';
+import SuccessMessage from '../UI/SuccessMessage';
 
 const Profile = () => {
   const { currentUser, updateUserProfile } = useAuth();
@@ -164,9 +166,12 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      </div>
+      <LoadingState
+        type="spinner"
+        size="lg"
+        text="載入中..."
+        fullScreen={true}
+      />
     );
   }
 
@@ -190,11 +195,12 @@ const Profile = () => {
         />
 
         {message.content && (
-          <div className={`fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
-            message.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-          } text-white`}>
-            {message.content}
-          </div>
+          <SuccessMessage
+            message={message.content}
+            type={message.type}
+            onClose={() => setMessage({ type: '', content: '' })}
+            duration={3000}
+          />
         )}
       </div>
     </div>

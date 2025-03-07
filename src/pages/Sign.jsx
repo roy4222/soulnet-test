@@ -5,6 +5,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LoadingState from '../components/UI/LoadingState';
+import SuccessMessage from '../components/UI/SuccessMessage';
 
 /**
  * Sign 組件 - 處理使用者登入
@@ -20,8 +22,7 @@ const Sign = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState({ type: '', content: '' });
   const [rememberMe, setRememberMe] = useState(false);
 
   /**
@@ -31,21 +32,20 @@ const Sign = () => {
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    setSuccess('');
+    setMessage({ type: '', content: '' });
 
     try {
       const { email, password } = formData;
       await login(email, password, rememberMe);
       
-      setSuccess('登入成功！正在為您導向...');
+      setMessage({ type: 'success', content: '登入成功！正在為您導向...' });
       
       setTimeout(() => {
         navigate('/');
       }, 1500);
     } catch (error) {
       console.error('登入失敗:', error);
-      setError(handleAuthError(error));
+      setMessage({ type: 'error', content: handleAuthError(error) });
     } finally {
       setIsLoading(false);
     }
@@ -58,23 +58,36 @@ const Sign = () => {
    */
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    setError('');
-    setSuccess('');
+    setMessage({ type: '', content: '' });
     
     try {
       await googleLogin(rememberMe);
-      setSuccess('登入成功！正在為您導向...');
+      setMessage({ type: 'success', content: '登入成功！正在為您導向...' });
       
       setTimeout(() => {
         navigate('/');
       }, 1500);
     } catch (error) {
       console.error('Google 登入失敗:', error);
-      setError(handleAuthError(error));
+      setMessage({ type: 'error', content: handleAuthError(error) });
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <LoadingState 
+        type="spinner" 
+        size="lg" 
+        text={
+          formData.email ? '登入中...' : 
+          'Google 登入中...'
+        }
+        fullScreen={true} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
@@ -86,16 +99,6 @@ const Sign = () => {
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             歡迎回來
           </p>
-          {error && (
-            <div className="mt-2 p-2 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mt-2 p-2 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              {success}
-            </div>
-          )}
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleEmailSignIn}>
@@ -161,7 +164,7 @@ const Sign = () => {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 11 11" className="mr-2">
                 <path d="M4.793 7.263a.5.5 0 0 0 .707.707l2.243-2.293a.25.25 0 0 0 0-.354L5.489 3.042a.5.5 0 0 0-.707.707L6 5H1.5a.5.5 0 0 0 0 1H6zM9 1H4.5a.5.5 0 0 0 0 1h4a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-4a.5.5 0 0 0 0 1H9a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z" fill="currentColor"/>
               </svg>
-              {isLoading ? '登入中...' : '登入'}
+              登入
             </button>
 
             <button
@@ -175,7 +178,7 @@ const Sign = () => {
                 src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
                 alt="Google logo"
               />
-              {isLoading ? '登入中...' : '使用 Google 帳號登入'}
+              使用 Google 帳號登入
             </button>
           </div>
         </form>
@@ -191,6 +194,15 @@ const Sign = () => {
           </div>
         </div>
       </div>
+
+      {message.content && (
+        <SuccessMessage
+          message={message.content}
+          type={message.type}
+          onClose={() => setMessage({ type: '', content: '' })}
+          duration={3000}
+        />
+      )}
     </div>
   );
 };

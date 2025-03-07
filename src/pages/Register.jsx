@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../utils/firebase';
+import LoadingState from '../components/UI/LoadingState';
+import SuccessMessage from '../components/UI/SuccessMessage';
 
 /**
  * Register 組件 - 處理使用者註冊
@@ -30,8 +32,7 @@ const Register = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState({ type: '', content: '' });
 
   /**
    * 處理表單提交
@@ -40,19 +41,18 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
-    setSuccess('');
+    setMessage({ type: '', content: '' });
 
     // 驗證密碼
     if (formData.password !== formData.confirmPassword) {
-      setError('兩次輸入的密碼不相符');
+      setMessage({ type: 'error', content: '兩次輸入的密碼不相符' });
       setIsLoading(false);
       return;
     }
 
     // 驗證密碼長度
     if (formData.password.length < 6) {
-      setError('密碼長度至少需要 6 個字元');
+      setMessage({ type: 'error', content: '密碼長度至少需要 6 個字元' });
       setIsLoading(false);
       return;
     }
@@ -71,7 +71,7 @@ const Register = () => {
       });
 
       console.log('註冊成功:', result.user);
-      setSuccess('註冊成功！正在為您導向...');
+      setMessage({ type: 'success', content: '註冊成功！正在為您導向...' });
 
       // 延遲導向到登入頁面
       setTimeout(() => {
@@ -79,33 +79,43 @@ const Register = () => {
       }, 1500);
     } catch (error) {
       console.error('註冊失敗:', error);
+      let errorMessage = '註冊失敗，請稍後再試';
+      
       switch (error.code) {
         case 'auth/email-already-in-use':
-          setError('此電子郵件已被使用');
+          errorMessage = '此電子郵件已被使用';
           break;
         case 'auth/invalid-email':
-          setError('無效的電子郵件格式');
+          errorMessage = '無效的電子郵件格式';
           break;
         case 'auth/operation-not-allowed':
-          setError('註冊功能尚未啟用，請聯絡管理員');
+          errorMessage = '註冊功能尚未啟用，請聯絡管理員';
           break;
         case 'auth/weak-password':
-          setError('密碼強度不足');
+          errorMessage = '密碼強度不足';
           break;
-        default:
-          setError('註冊失敗，請稍後再試');
       }
+      
+      setMessage({ type: 'error', content: errorMessage });
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <LoadingState 
+        type="dots" 
+        size="lg" 
+        text="建立帳號中..."
+        fullScreen={true} 
+      />
+    );
+  }
+
   return (
-    // 主容器 - 全屏高度、居中顯示、漸變背景
     <div className="min-h-screen flex items-center justify-center dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
-      {/* 註冊卡片 - 有陰影和懸停效果 */}
       <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg transform transition-all hover:scale-[1.01]">
-        {/* 標題區域 */}
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
             建立新帳號
@@ -113,22 +123,10 @@ const Register = () => {
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             開始您的旅程
           </p>
-          {error && (
-            <div className="mt-2 p-2 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="mt-2 p-2 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              {success}
-            </div>
-          )}
         </div>
-        {/* 註冊表單 */}
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {/* 輸入欄位容器 */}
           <div className="rounded-md shadow-sm space-y-4">
-            {/* 使用者名稱輸入區域 */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 使用者名稱
@@ -143,7 +141,6 @@ const Register = () => {
                 placeholder="使用者名稱"
               />
             </div>
-            {/* 電子郵件輸入區域 */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 電子郵件
@@ -158,7 +155,6 @@ const Register = () => {
                 placeholder="****@email.com"
               />
             </div>
-            {/* 密碼輸入區域 */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 密碼
@@ -173,7 +169,6 @@ const Register = () => {
                 placeholder="••••••••"
               />
             </div>
-            {/* 確認密碼輸入區域 */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 確認密碼
@@ -189,7 +184,7 @@ const Register = () => {
               />
             </div>
           </div>
-          {/* 註冊按鈕 */}
+
           <div>
             <button
               type="submit"
@@ -199,16 +194,14 @@ const Register = () => {
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" className="mr-2">
                 <path fill="currentColor" d="M18 11h-2q-.425 0-.712-.288T15 10t.288-.712T16 9h2V7q0-.425.288-.712T19 6t.713.288T20 7v2h2q.425 0 .713.288T23 10t-.288.713T22 11h-2v2q0 .425-.288.713T19 14t-.712-.288T18 13zm-9 1q-1.65 0-2.825-1.175T5 8t1.175-2.825T9 4t2.825 1.175T13 8t-1.175 2.825T9 12m-8 6v-.8q0-.85.438-1.562T2.6 14.55q1.55-.775 3.15-1.162T9 13t3.25.388t3.15 1.162q.725.375 1.163 1.088T17 17.2v.8q0 .825-.587 1.413T15 20H3q-.825 0-1.412-.587T1 18m2 0h12v-.8q0-.275-.137-.5t-.363-.35q-1.35-.675-2.725-1.012T9 15t-2.775.338T3.5 16.35q-.225.125-.363.35T3 17.2zm6-8q.825 0 1.413-.587T11 8t-.587-1.412T9 6t-1.412.588T7 8t.588 1.413T9 10m0 8"/>
               </svg>
-              {isLoading ? '註冊中...' : '立即註冊'}
+              立即註冊
             </button>
           </div>
         </form>
         
-        {/* 返回登入連結區域 */}
         <div className="flex items-center justify-center mt-6">
           <div className="text-sm">
             <Link to="/sign" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 flex items-center group">
-              {/* 返回箭頭圖示 - 有懸停動畫效果 */}
               <svg className="w-4 h-4 mr-2 transform transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
               </svg>
@@ -217,6 +210,15 @@ const Register = () => {
           </div>
         </div>
       </div>
+
+      {message.content && (
+        <SuccessMessage
+          message={message.content}
+          type={message.type}
+          onClose={() => setMessage({ type: '', content: '' })}
+          duration={3000}
+        />
+      )}
     </div>
   );
 };

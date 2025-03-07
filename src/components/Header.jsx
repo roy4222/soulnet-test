@@ -7,6 +7,8 @@ import MobileMenu from './MobileMenu';
 import Sidebar from './Sidebar';
 import { NAV_LINKS } from '../config/navLinks';
 import logoImage from '../assets/icons/player.jpg';
+import SuccessMessage from './UI/SuccessMessage';
+import LoadingState from './UI/LoadingState';
 
 const Header = () => {
   // 從 ThemeContext 獲取主題相關狀態和方法
@@ -28,24 +30,38 @@ const Header = () => {
   // 本地狀態
   const [isDropdownOpen, setIsDropdownOpen] = useState(false); // 下拉選單開關狀態
   const [searchQuery, setSearchQuery] = useState(''); // 搜尋關鍵字
+  const [message, setMessage] = useState({ type: '', content: '' }); // 訊息提示狀態
+  const [isLoading, setIsLoading] = useState(false); // 載入狀態
 
   // 處理登出
   const handleSignOut = async () => {
+    setIsLoading(true);
     try {
       await logout();
-      navigate('/sign'); // 登出後導向登入頁
+      setMessage({ type: 'success', content: '登出成功！' });
+      setTimeout(() => {
+        navigate('/sign'); // 登出後導向登入頁
+      }, 1500);
     } catch (error) {
       console.error('登出失敗:', error);
+      setMessage({ type: 'error', content: '登出失敗，請稍後再試' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // 處理搜尋
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // 導向搜尋結果頁面並帶入查詢參數
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery(''); // 清空搜尋框
+      setIsLoading(true);
+      try {
+        // 導向搜尋結果頁面並帶入查詢參數
+        await navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        setSearchQuery(''); // 清空搜尋框
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -58,6 +74,10 @@ const Header = () => {
       return false;
     });
   }, [currentUser, isAdmin]);
+
+  if (isLoading) {
+    return <LoadingState type="spinner" size="lg" text="處理中..." fullScreen={true} />;
+  }
 
   return (
     <>
@@ -238,6 +258,16 @@ const Header = () => {
       }`}>
         {/* 這裡的內容會由 Outlet 組件渲染 */}
       </div>
+
+      {/* 訊息提示 */}
+      {message.content && (
+        <SuccessMessage
+          message={message.content}
+          type={message.type}
+          onClose={() => setMessage({ type: '', content: '' })}
+          duration={3000}
+        />
+      )}
     </>
   );
 };
