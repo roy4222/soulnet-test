@@ -35,14 +35,20 @@ const LoadingState = ({ type = 'spinner', size = 'md', text, fullScreen = false 
       // 跳動點點動畫
       case 'dots':
         return (
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             {[1, 2, 3].map((dot) => (
               <div
                 key={dot}
                 className={`${
                   size === 'sm' ? 'h-2 w-2' : size === 'md' ? 'h-3 w-3' : 'h-4 w-4'
-                } bg-blue-500 rounded-full animate-bounce`}
-                style={{ animationDelay: `${dot * 0.15}s` }}
+                } bg-gradient-to-r from-blue-400 to-blue-600 rounded-full 
+                shadow-lg transform transition-all duration-500 ease-in-out
+                hover:shadow-blue-400/50 hover:scale-125`}
+                style={{ 
+                  animation: 'bounce 1.2s ease-in-out infinite',
+                  animationDelay: `${dot * 0.2}s`,
+                  opacity: 0.9
+                }}
               />
             ))}
           </div>

@@ -145,7 +145,15 @@ export function AuthProvider({ children }) {
     try {
       await signOut(auth);
       setUserRole(null);
+      // 清除本地儲存的所有用戶相關資料
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('theme');
+      // 重置狀態
+      setCurrentUser(null);
+      setError(null);
     } catch (error) {
+      console.error('登出失敗:', error);
       throw error;
     }
   };

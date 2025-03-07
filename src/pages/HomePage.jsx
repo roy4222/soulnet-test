@@ -42,7 +42,7 @@ const HomePage = () => {
     const initializeHomePage = async () => {
       try {
         // 模擬資料載入
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 100));
         setMessage({ type: 'success', content: '歡迎來到 SoulNet！' });
       } catch (error) {
         console.error('載入失敗:', error);

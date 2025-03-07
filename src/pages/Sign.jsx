@@ -81,8 +81,8 @@ const Sign = () => {
         type="spinner" 
         size="lg" 
         text={
-          formData.email ? '登入中...' : 
-          'Google 登入中...'
+          formData.email ? '正在使用電子郵件登入...' : 
+          'Google 帳號登入中...'
         }
         fullScreen={true} 
       />
@@ -200,7 +200,7 @@ const Sign = () => {
           message={message.content}
           type={message.type}
           onClose={() => setMessage({ type: '', content: '' })}
-          duration={3000}
+          duration={1500}
         />
       )}
     </div>

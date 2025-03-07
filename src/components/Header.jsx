@@ -35,17 +35,31 @@ const Header = () => {
 
   // 處理登出
   const handleSignOut = async () => {
-    setIsLoading(true);
     try {
+      // 設定載入狀態
+      setIsLoading(true);
+      // 關閉下拉選單
+      setIsDropdownOpen(false);
+      // 顯示登出中訊息
+      setMessage({ type: 'info', content: '正在登出...' });
+      // 執行登出
       await logout();
-      setMessage({ type: 'success', content: '登出成功！' });
+      // 顯示成功訊息
+      setMessage({ type: 'success', content: '登出成功！期待您的再次造訪' });
+      
+      // 延遲導向登入頁面
       setTimeout(() => {
-        navigate('/sign'); // 登出後導向登入頁
+        // 清除本地狀態
+        setSearchQuery('');
+        setMessage({ type: '', content: '' });
+        // 導向登入頁
+        navigate('/sign');
+        // 最後再關閉載入狀態
+        setIsLoading(false);
       }, 1500);
     } catch (error) {
       console.error('登出失敗:', error);
       setMessage({ type: 'error', content: '登出失敗，請稍後再試' });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -75,8 +89,16 @@ const Header = () => {
     });
   }, [currentUser, isAdmin]);
 
+  // 如果正在載入中，顯示載入狀態
   if (isLoading) {
-    return <LoadingState type="spinner" size="lg" text="處理中..." fullScreen={true} />;
+    return (
+      <LoadingState
+        type="pulse"
+        size="lg"
+        text="正在安全登出您的帳號..."
+        fullScreen={true}
+      />
+    );
   }
 
   return (
@@ -265,7 +287,7 @@ const Header = () => {
           message={message.content}
           type={message.type}
           onClose={() => setMessage({ type: '', content: '' })}
-          duration={3000}
+          duration={1500}
         />
       )}
     </>

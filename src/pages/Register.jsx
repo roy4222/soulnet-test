@@ -107,7 +107,11 @@ const Register = () => {
       <LoadingState 
         type="dots" 
         size="lg" 
-        text="建立帳號中..."
+        text={
+          formData.username ? 
+          `正在為 ${formData.username} 建立帳號...` : 
+          '建立新帳號中...'
+        }
         fullScreen={true} 
       />
     );
@@ -216,7 +220,7 @@ const Register = () => {
           message={message.content}
           type={message.type}
           onClose={() => setMessage({ type: '', content: '' })}
-          duration={3000}
+          duration={1500}
         />
       )}
     </div>
