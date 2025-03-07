@@ -4,25 +4,39 @@
  */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * ResetPassword 組件 - 處理使用者重設密碼
  * @returns {JSX.Element} 重設密碼頁面的 JSX 元素
  */
 const ResetPassword = () => {
-  /**
-   * 電子郵件狀態
-   * @type {string}
-   */
+  const { resetPassword, handleAuthError } = useAuth();
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   /**
    * 處理表單提交
    * @param {Event} e - 表單提交事件
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: 處理重設密碼邏輯
+    setIsLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await resetPassword(email);
+      setSuccess('重設密碼郵件已發送！請檢查您的收件匣。');
+      setEmail(''); // 清空輸入框
+    } catch (error) {
+      console.error('重設密碼失敗:', error);
+      setError(handleAuthError(error));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -38,6 +52,16 @@ const ResetPassword = () => {
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             請輸入您的電子郵件地址，我們將發送重設密碼的連結給您
           </p>
+          {error && (
+            <div className="mt-2 p-2 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mt-2 p-2 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              {success}
+            </div>
+          )}
         </div>
         {/* 重設密碼表單 */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -54,8 +78,9 @@ const ResetPassword = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="appearance-none relative block w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700"
-                placeholder="your@email.com"
+                disabled={isLoading}
+                className="appearance-none relative block w-full px-3 py-2 mt-1 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="****@email.com"
               />
             </div>
           </div>
@@ -64,9 +89,10 @@ const ResetPassword = () => {
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-150 hover:scale-[1.02]"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-150 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              發送重設連結
+              {isLoading ? '發送中...' : '發送重設連結'}
             </button>
           </div>
         </form>

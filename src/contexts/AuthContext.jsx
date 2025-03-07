@@ -20,7 +20,8 @@ import {
   signInWithPopup,
   setPersistence,
   browserLocalPersistence,
-  browserSessionPersistence
+  browserSessionPersistence,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
@@ -218,6 +219,21 @@ export function AuthProvider({ children }) {
     return errorMessages[error.code] || errorMessages.default;
   };
 
+  /**
+   * 發送重設密碼郵件
+   * @param {string} email - 用戶郵箱
+   * @returns {Promise<void>}
+   */
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (error) {
+      console.error('發送重設密碼郵件失敗:', error);
+      throw error;
+    }
+  };
+
   // 監聽用戶身份驗證狀態變化
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -270,6 +286,7 @@ export function AuthProvider({ children }) {
     updateUserPassword,   // 更新用戶密碼
     updateUserProfile,    // 更新用戶資料
     handleAuthError,      // 處理身份驗證錯誤
+    resetPassword,        // 發送重設密碼郵件
     loading,             // 載入狀態
     error               // 錯誤訊息
   };
