@@ -14,6 +14,7 @@
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@react-oauth/google": "^0.12.1",
     "browser-image-compression": "^2.0.2",
     "classnames": "^2.5.1",
     "date-fns": "^4.1.0",

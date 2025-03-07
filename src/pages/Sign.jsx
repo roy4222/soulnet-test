@@ -2,14 +2,21 @@
  * 登入頁面組件
  * 提供使用者登入功能的介面
  */
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../utils/firebase';
+
+const googleProvider = new GoogleAuthProvider();
 
 /**
  * Sign 組件 - 處理使用者登入
  * @returns {JSX.Element} 登入頁面的 JSX 元素
  */
 const Sign = () => {
+  // 使用 React Router 的導航鉤子，用於頁面跳轉
+  const navigate = useNavigate();
+  
   /**
    * 表單資料狀態
    * @type {Object}
@@ -21,13 +28,73 @@ const Sign = () => {
     password: ''
   });
 
+  // 載入狀態，用於控制按鈕禁用和顯示載入指示器
+  const [isLoading, setIsLoading] = useState(false);
+  // 錯誤訊息狀態，用於顯示登入過程中的錯誤
+  const [error, setError] = useState('');
+  // 成功訊息狀態，用於顯示登入成功的反饋
+  const [success, setSuccess] = useState('');
+
+  /**
+   * 處理 Google 登入
+   * 使用 Firebase 的 Google 彈出視窗登入方式
+   * @async
+   * @function
+   */
+  const handleGoogleSignIn = async () => {
+    // 設置載入狀態為真，開始處理登入
+    setIsLoading(true);
+    // 清空之前的錯誤和成功訊息
+    setError('');
+    setSuccess('');
+    
+    try {
+      // 嘗試使用 Google 提供者進行彈出視窗登入
+      const result = await signInWithPopup(auth, googleProvider);
+      // 獲取登入成功的用戶資訊
+      const user = result.user;
+      console.log('Google 登入成功:', user);
+      
+      // 設定成功訊息，通知用戶登入成功
+      setSuccess('登入成功！正在為您導向...');
+      
+      // 延遲一下再導向，讓使用者看到成功訊息
+      setTimeout(() => {
+        // 導向到首頁或儀表板
+        navigate('/');
+      }, 1500);
+      
+    } catch (error) {
+      // 捕獲並處理登入過程中的錯誤
+      console.error('Google 登入失敗:', error);
+      
+      // 根據不同的錯誤代碼顯示對應的錯誤訊息
+      switch (error.code) {
+        case 'auth/operation-not-allowed':
+          setError('Google 登入尚未啟用，請聯絡管理員');
+          break;
+        case 'auth/popup-blocked':
+          setError('請允許彈出視窗以繼續登入');
+          break;
+        case 'auth/cancelled-popup-request':
+          setError('登入已取消');
+          break;
+        default:
+          setError('登入失敗，請稍後再試');
+      }
+    } finally {
+      // 無論成功或失敗，最終都將載入狀態設為假
+      setIsLoading(false);
+    }
+  };
+
   /**
    * 處理表單提交
    * @param {Event} e - 表單提交事件
    */
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: 處理登入邏輯
+    // TODO: 處理一般登入邏輯
   };
 
   return (
@@ -43,6 +110,18 @@ const Sign = () => {
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             歡迎回來
           </p>
+          {/* 錯誤訊息顯示 */}
+          {error && (
+            <div className="mt-2 p-2 text-sm text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded-lg">
+              {error}
+            </div>
+          )}
+          {/* 成功訊息顯示 */}
+          {success && (
+            <div className="mt-2 p-2 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              {success}
+            </div>
+          )}
         </div>
         {/* 登入表單 */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -104,12 +183,28 @@ const Sign = () => {
           </div>
 
           {/* 登入按鈕 */}
-          <div>
+          <div className="space-y-4">
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-150 hover:scale-[1.02]"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-150 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              登入
+              {isLoading ? '登入中...' : '登入'}
+            </button>
+
+            {/* Google 登入按鈕 */}
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+              className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition-all duration-150 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <img
+                className="h-5 w-5 mr-2"
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google logo"
+              />
+              {isLoading ? '登入中...' : '使用 Google 帳號登入'}
             </button>
           </div>
         </form>
