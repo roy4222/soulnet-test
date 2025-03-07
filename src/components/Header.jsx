@@ -1,9 +1,23 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
   const { isDarkMode, toggleTheme } = useTheme();
+  const { currentUser, logout, userRole, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // 處理登出
+  const handleSignOut = async () => {
+    try {
+      await logout();
+      navigate('/sign');
+    } catch (error) {
+      console.error('登出失敗:', error);
+    }
+  };
 
   return (
     <header className="bg-white dark:bg-gray-800 shadow">
@@ -13,17 +27,90 @@ const Header = () => {
             SoulNet
           </Link>
           <div className="flex items-center space-x-6">
-           
-            <div className="flex items-center space-x-4">
-              <Link to="/sign" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
-                登入
-              </Link>
-              <Link to="/register" className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-                註冊
-              </Link>
-            </div>
-             {/* 暗黑模式切換按鈕 */}
-             <button
+            {currentUser ? (
+              <div className="relative">
+                {/* 用戶資訊按鈕 - 顯示用戶名稱、頭像和管理員標籤 */}
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-3 focus:outline-none"
+                >
+                  <span className="text-gray-700 dark:text-gray-200">
+                    {currentUser.displayName || '使用者'}
+                    {/* 如果是管理員則顯示管理員標籤 */}
+                    {isAdmin() && (
+                      <span className="ml-2 text-xs px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300 rounded-full">
+                        管理員
+                      </span>
+                    )}
+                  </span>
+                  {/* 用戶頭像區域 */}
+                  <div className="relative">
+                    {/* 如果有頭像則顯示頭像,否則顯示用戶名首字母 */}
+                    {currentUser.photoURL ? (
+                      <img
+                        src={currentUser.photoURL}
+                        alt="用戶頭像"
+                        className="w-8 h-8 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                        {(currentUser.displayName || '使用者')[0].toUpperCase()}
+                      </div>
+                    )}
+                    {/* 在線狀態指示器 */}
+                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+                  </div>
+                </button>
+
+                {/* 下拉選單 - 包含個人資料、管理後台和登出選項 */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
+                    {/* 個人資料連結 */}
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      個人資料
+                    </Link>
+                    {/* 管理員專用的管理後台連結 */}
+                    {isAdmin() && (
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        管理後台
+                      </Link>
+                    )}
+                    {/* 分隔線 */}
+                    <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                    {/* 登出按鈕 */}
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsDropdownOpen(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    >
+                      登出
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link to="/sign" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                  登入
+                </Link>
+                <Link to="/register" className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                  註冊
+                </Link>
+              </div>
+            )}
+            
+            {/* 暗黑模式切換按鈕 */}
+            <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
               aria-label="切換暗黑模式"

@@ -15,12 +15,20 @@ import {
   updateProfile,
   updatePassword,
   EmailAuthProvider,
-  reauthenticateWithCredential
+  reauthenticateWithCredential,
+  GoogleAuthProvider,
+  signInWithPopup,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence
 } from 'firebase/auth';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 // 創建身份驗證 Context
 const AuthContext = createContext();
+
+// 創建 Google 提供者實例
+const googleProvider = new GoogleAuthProvider();
 
 /**
  * AuthProvider 組件 - 提供身份驗證相關的狀態和方法
@@ -33,6 +41,21 @@ export function AuthProvider({ children }) {
   const [userRole, setUserRole] = useState(null);        // 用戶角色
   const [loading, setLoading] = useState(true);          // 載入狀態
   const [error, setError] = useState(null);              // 錯誤狀態
+
+  /**
+   * 設定登入持久性
+   * @param {boolean} rememberMe - 是否記住登入狀態
+   */
+  const setPersistenceType = async (rememberMe) => {
+    try {
+      await setPersistence(auth, 
+        rememberMe ? browserLocalPersistence : browserSessionPersistence
+      );
+    } catch (error) {
+      console.error('設定持久性失敗:', error);
+      throw error;
+    }
+  };
 
   /**
    * 用戶註冊函數
@@ -55,11 +78,27 @@ export function AuthProvider({ children }) {
    * 用戶登入函數
    * @param {string} email - 用戶郵箱
    * @param {string} password - 用戶密碼
+   * @param {boolean} rememberMe - 是否記住登入狀態
    * @returns {Promise<UserCredential>} Firebase 用戶憑證
    */
-  const login = async (email, password) => {
+  const login = async (email, password, rememberMe = false) => {
     try {
+      await setPersistenceType(rememberMe);
       return await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  /**
+   * Google 登入函數
+   * @param {boolean} rememberMe - 是否記住登入狀態
+   * @returns {Promise<UserCredential>} Firebase 用戶憑證
+   */
+  const googleLogin = async (rememberMe = false) => {
+    try {
+      await setPersistenceType(rememberMe);
+      return await signInWithPopup(auth, googleProvider);
     } catch (error) {
       throw error;
     }
@@ -225,6 +264,7 @@ export function AuthProvider({ children }) {
     checkUserRole,    // 檢查用戶角色的方法
     register,         // 註冊方法
     login,           // 登入方法
+    googleLogin,     // Google 登入方法
     logout,          // 登出方法
     reauthenticateUser,  // 重新驗證用戶身份
     updateUserPassword,   // 更新用戶密碼
