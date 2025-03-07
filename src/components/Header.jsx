@@ -6,27 +6,34 @@ import defaultAvatar from '../assets/images/images.webp';
 import MobileMenu from './MobileMenu';
 import Sidebar from './Sidebar';
 import { NAV_LINKS } from '../config/navLinks';
-import logoImage from '../assets/icons/logo.webp';
+import logoImage from '../assets/icons/player.jpg';
 
 const Header = () => {
+  // 從 ThemeContext 獲取主題相關狀態和方法
   const { isDarkMode, toggleTheme } = useTheme();
+
+  // 從 AuthContext 獲取使用者相關狀態和方法
   const { 
-    currentUser, 
-    logout, 
-    isAdmin, 
-    isSidebarCollapsed, 
-    toggleSidebar 
+    currentUser,  // 當前登入的使用者
+    logout,      // 登出方法
+    isAdmin,     // 是否為管理員
+    isSidebarCollapsed,  // 側邊欄是否收合
+    toggleSidebar       // 切換側邊欄方法
   } = useAuth();
+
+  // 路由相關 hooks
   const navigate = useNavigate();
   const location = useLocation();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+
+  // 本地狀態
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // 下拉選單開關狀態
+  const [searchQuery, setSearchQuery] = useState(''); // 搜尋關鍵字
 
   // 處理登出
   const handleSignOut = async () => {
     try {
       await logout();
-      navigate('/sign');
+      navigate('/sign'); // 登出後導向登入頁
     } catch (error) {
       console.error('登出失敗:', error);
     }
@@ -36,8 +43,9 @@ const Header = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      // 導向搜尋結果頁面並帶入查詢參數
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+      setSearchQuery(''); // 清空搜尋框
     }
   };
 
@@ -146,13 +154,15 @@ const Header = () => {
                         <img
                           src={currentUser.photoURL}
                           alt="用戶頭像"
-                          className="w-8 h-8 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
+                          style={{ aspectRatio: '1/1' }}
                         />
                       ) : (
                         <img
                           src={defaultAvatar}
                           alt="預設頭像"
-                          className="w-8 h-8 rounded-full object-cover"
+                          className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
+                          style={{ aspectRatio: '1/1' }}
                         />
                       )}
                       <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>

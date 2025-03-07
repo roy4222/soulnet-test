@@ -82,8 +82,8 @@ export const uploadImageToR2 = async (file, folder = 'images/') => {
     // 執行上傳操作
     await r2Client.send(command);
 
-    // 生成並返回可訪問的圖片 URL
-    const imageUrl = `${r2Config.endpoint}/${fileName}`;
+    // 返回可訪問的 URL，使用公開端點
+    const imageUrl = `https://${import.meta.env.VITE_R2_ENDPOINT}/${fileName}`;
     console.log('上傳成功，圖片URL:', imageUrl);
     return imageUrl;
 
@@ -211,8 +211,8 @@ export const compressImage = async (file, customOptions = {}) => {
       // 執行上傳
       await r2Client.send(command);
   
-      // 返回可訪問的 URL
-      const imageUrl = `${r2Config.endpoint}/${fileName}`;
+      // 返回可訪問的 URL，使用公開端點
+      const imageUrl = `https://${import.meta.env.VITE_R2_ENDPOINT}/${fileName}`;
       console.log('上傳成功，圖片URL:', imageUrl);
       return imageUrl;
   
