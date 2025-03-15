@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
-import { NAV_LINKS } from '../config/navLinks';
+
 
 const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,15 +39,7 @@ const MobileMenu = () => {
     }
   };
 
-  // 使用 useMemo 優化導航連結過濾
-  const filteredNavLinks = useMemo(() => {
-    return NAV_LINKS.filter(link => {
-      if (link.public) return true;
-      if (link.admin) return isAdmin();
-      if (link.auth) return !!currentUser;
-      return false;
-    });
-  }, [currentUser, isAdmin]);
+
 
   return (
     <div className="md:hidden">
@@ -128,25 +120,7 @@ const MobileMenu = () => {
             </div>
           </div>
 
-          {/* 導航連結 */}
-          <div className="py-2">
-            {filteredNavLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`flex items-center space-x-3 px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                  location.pathname === link.path
-                    ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
-                    : ""
-                }`}
-                onClick={() => setIsOpen(false)}
-              >
-                {link.icon}
-                <span>{link.label}</span>
-              </Link>
-            ))}
-          </div>
-
+         
           {/* 底部操作區 */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">

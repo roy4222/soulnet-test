@@ -4,7 +4,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import defaultAvatar from '../assets/images/images.webp';
 import MobileMenu from './MobileMenu';
-import { NAV_LINKS } from '../config/navLinks';
 import logoImage from '../assets/icons/player.jpg';
 import SuccessMessage from './UI/SuccessMessage';
 import LoadingState from './UI/LoadingState';
@@ -76,16 +75,6 @@ const Header = () => {
     }
   };
 
-  // 使用 useMemo 優化導航連結過濾
-  const filteredNavLinks = useMemo(() => {
-    return NAV_LINKS.filter(link => {
-      if (link.public) return true;
-      if (link.admin) return isAdmin();
-      if (link.auth) return !!currentUser;
-      return false;
-    });
-  }, [currentUser, isAdmin]);
-
   // 如果正在載入中，顯示載入狀態
   if (isLoading) {
     return (
@@ -150,6 +139,24 @@ const Header = () => {
 
             {/* 右側操作區 */}
             <div className="flex items-center space-x-4">
+
+              {/* 暗黑模式切換按鈕 */}
+              <button
+                    onClick={toggleTheme}
+                    className="hidden md:flex p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    aria-label="切換暗黑模式"
+                  >
+                    {isDarkMode ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 36 36">
+                        <path fill="#FFAC33" d="M16 2s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2zm18 14s2 0 2 2s-2 2-2 2h-2s-2 0-2-2s2-2 2-2zM4 16s2 0 2 2s-2 2-2 2H2s-2 0-2-2s2-2 2-2zm5.121-8.707s1.414 1.414 0 2.828s-2.828 0-2.828 0L4.878 8.708s-1.414-1.414 0-2.829c1.415-1.414 2.829 0 2.829 0zm21 21s1.414 1.414 0 2.828s-2.828 0-2.828 0l-1.414-1.414s-1.414-1.414 0-2.828s2.828 0 2.828 0zm-.413-18.172s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zm-21 21s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zM16 32s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2z"/>
+                        <circle cx="18" cy="18" r="10" fill="#FFAC33"/>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9s9-4.03 9-9c0-.46-.04-.92-.1-1.36c-.98 1.37-2.58 2.26-4.4 2.26c-3.03 0-5.5-2.47-5.5-5.5c0-1.82.89-3.42 2.26-4.4c-.44-.06-.9-.1-1.36-.1z"/>
+                      </svg>
+                    )}
+                </button>
               
               {/* 用戶相關操作 */}
               {currentUser ? (
@@ -177,23 +184,7 @@ const Header = () => {
                     <span className="whitespace-nowrap">發表文章</span>
                   </Link>
 
-                  {/* 暗黑模式切換按鈕 */}
-                  <button
-                    onClick={toggleTheme}
-                    className="hidden md:flex p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    aria-label="切換暗黑模式"
-                  >
-                    {isDarkMode ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 36 36">
-                        <path fill="#FFAC33" d="M16 2s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2zm18 14s2 0 2 2s-2 2-2 2h-2s-2 0-2-2s2-2 2-2zM4 16s2 0 2 2s-2 2-2 2H2s-2 0-2-2s2-2 2-2zm5.121-8.707s1.414 1.414 0 2.828s-2.828 0-2.828 0L4.878 8.708s-1.414-1.414 0-2.829c1.415-1.414 2.829 0 2.829 0zm21 21s1.414 1.414 0 2.828s-2.828 0-2.828 0l-1.414-1.414s-1.414-1.414 0-2.828s2.828 0 2.828 0zm-.413-18.172s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zm-21 21s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zM16 32s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2z"/>
-                        <circle cx="18" cy="18" r="10" fill="#FFAC33"/>
-                      </svg>
-                    ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9s9-4.03 9-9c0-.46-.04-.92-.1-1.36c-.98 1.37-2.58 2.26-4.4 2.26c-3.03 0-5.5-2.47-5.5-5.5c0-1.82.89-3.42 2.26-4.4c-.44-.06-.9-.1-1.36-.1z"/>
-                      </svg>
-                    )}
-                  </button>
+                  
 
 
                   <div className="relative">
