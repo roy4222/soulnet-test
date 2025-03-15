@@ -4,7 +4,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import defaultAvatar from '../assets/images/images.webp';
 import MobileMenu from './MobileMenu';
-import Sidebar from './Sidebar';
 import { NAV_LINKS } from '../config/navLinks';
 import logoImage from '../assets/icons/player.jpg';
 import SuccessMessage from './UI/SuccessMessage';
@@ -19,8 +18,6 @@ const Header = () => {
     currentUser,  // 當前登入的使用者
     logout,      // 登出方法
     isAdmin,     // 是否為管理員
-    isSidebarCollapsed,  // 側邊欄是否收合
-    toggleSidebar       // 切換側邊欄方法
   } = useAuth();
 
   // 路由相關 hooks
@@ -103,35 +100,11 @@ const Header = () => {
 
   return (
     <>
-      {/* 頂部導航欄 */}
       <header className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 h-16 shadow-md z-50">
         <div className="container mx-auto px-4 h-full">
           <div className="flex justify-between items-center h-full">
             {/* Logo 區域 */}
             <div className="flex items-center space-x-4">
-              {/* 側邊欄切換按鈕 */}
-              <button
-                onClick={toggleSidebar}
-                className="hidden md:flex p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label={isSidebarCollapsed ? "展開側邊欄" : "收合側邊欄"}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  {isSidebarCollapsed ? (
-                    <path d="M4 6h16M4 12h16M4 18h16"/>
-                  ) : (
-                    <path d="M3 12h18M3 6h18M3 18h18"/>
-                  )}
-                </svg>
-              </button>
               <Link to="/" className="flex items-center space-x-2">
                 <img 
                   src={logoImage}
@@ -166,92 +139,119 @@ const Header = () => {
 
             {/* 右側操作區 */}
             <div className="flex items-center space-x-4">
-              {/* 暗黑模式切換按鈕 */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-                aria-label="切換暗黑模式"
-              >
-                {isDarkMode ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 36 36">
-                    <path fill="#FFAC33" d="M16 2s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2zm18 14s2 0 2 2s-2 2-2 2h-2s-2 0-2-2s2-2 2-2zM4 16s2 0 2 2s-2 2-2 2H2s-2 0-2-2s2-2 2-2zm5.121-8.707s1.414 1.414 0 2.828s-2.828 0-2.828 0L4.878 8.708s-1.414-1.414 0-2.829c1.415-1.414 2.829 0 2.829 0zm21 21s1.414 1.414 0 2.828s-2.828 0-2.828 0l-1.414-1.414s-1.414-1.414 0-2.828s2.828 0 2.828 0zm-.413-18.172s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zm-21 21s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zM16 32s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2z"/>
-                    <circle cx="18" cy="18" r="10" fill="#FFAC33"/>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9s9-4.03 9-9c0-.46-.04-.92-.1-1.36c-.98 1.37-2.58 2.26-4.4 2.26c-3.03 0-5.5-2.47-5.5-5.5c0-1.82.89-3.42 2.26-4.4c-.44-.06-.9-.1-1.36-.1z"/>
-                  </svg>
-                )}
-              </button>
-
+              
               {/* 用戶相關操作 */}
               {currentUser ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center space-x-3 focus:outline-none"
+                <div className="flex items-center space-x-4">
+                  {/* 發表文章按鈕 */}
+                  <Link 
+                    to="/new-post"
+                    className="hidden md:flex bg-blue-500 dark:bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700 transition duration-300 shadow-md items-center space-x-2"
                   >
-                    <div className="relative">
-                      {currentUser.photoURL ? (
-                        <img
-                          src={currentUser.photoURL}
-                          alt="用戶頭像"
-                          className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
-                          style={{ aspectRatio: '1/1' }}
-                        />
-                      ) : (
-                        <img
-                          src={defaultAvatar}
-                          alt="預設頭像"
-                          className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
-                          style={{ aspectRatio: '1/1' }}
-                        />
-                      )}
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
-                    </div>
+                    {/* 加號圖標 */}
+                    <svg 
+                      className="w-5 h-5 flex-shrink-0" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth="2" 
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                    {/* 按鈕文字 */}
+                    <span className="whitespace-nowrap">發表文章</span>
+                  </Link>
+
+                  {/* 暗黑模式切換按鈕 */}
+                  <button
+                    onClick={toggleTheme}
+                    className="hidden md:flex p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    aria-label="切換暗黑模式"
+                  >
+                    {isDarkMode ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 36 36">
+                        <path fill="#FFAC33" d="M16 2s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2zm18 14s2 0 2 2s-2 2-2 2h-2s-2 0-2-2s2-2 2-2zM4 16s2 0 2 2s-2 2-2 2H2s-2 0-2-2s2-2 2-2zm5.121-8.707s1.414 1.414 0 2.828s-2.828 0-2.828 0L4.878 8.708s-1.414-1.414 0-2.829c1.415-1.414 2.829 0 2.829 0zm21 21s1.414 1.414 0 2.828s-2.828 0-2.828 0l-1.414-1.414s-1.414-1.414 0-2.828s2.828 0 2.828 0zm-.413-18.172s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zm-21 21s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zM16 32s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2z"/>
+                        <circle cx="18" cy="18" r="10" fill="#FFAC33"/>
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9s9-4.03 9-9c0-.46-.04-.92-.1-1.36c-.98 1.37-2.58 2.26-4.4 2.26c-3.03 0-5.5-2.47-5.5-5.5c0-1.82.89-3.42 2.26-4.4c-.44-.06-.9-.1-1.36-.1z"/>
+                      </svg>
+                    )}
                   </button>
 
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
-                      <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                          {currentUser.displayName || '使用者'}
-                          {isAdmin() && (
-                            <span className="ml-2 text-xs px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300 rounded-full">
-                              管理員
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
-                          {currentUser.email}
-                        </div>
+
+                  <div className="relative">
+                    <button
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      className="flex items-center space-x-3 focus:outline-none"
+                    >
+                      <div className="relative">
+                        {currentUser.photoURL ? (
+                          <img
+                            src={currentUser.photoURL}
+                            alt="用戶頭像"
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
+                            style={{ aspectRatio: '1/1' }}
+                          />
+                        ) : (
+                          <img
+                            src={defaultAvatar}
+                            alt="預設頭像"
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
+                            style={{ aspectRatio: '1/1' }}
+                          />
+                        )}
+                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
                       </div>
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        個人資料
-                      </Link>
-                      <Link
-                        to="/settings"
-                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        設定
-                      </Link>
-                      <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
-                      <button
-                        onClick={() => {
-                          handleSignOut();
-                          setIsDropdownOpen(false);
-                        }}
-                        className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600"
-                      >
-                        登出
-                      </button>
-                    </div>
-                  )}
+                    </button>
+
+                    {isDropdownOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
+                        <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                          <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                            {currentUser.displayName || '使用者'}
+                            {isAdmin() && (
+                              <span className="ml-2 text-xs px-2 py-0.5 bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300 rounded-full">
+                                管理員
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                            {currentUser.email}
+                          </div>
+                        </div>
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          個人資料
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          設定
+                        </Link>
+                        <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
+                        <button
+                          onClick={() => {
+                            handleSignOut();
+                            setIsDropdownOpen(false);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600"
+                        >
+                          登出
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <div className="hidden md:flex items-center space-x-4">
@@ -271,13 +271,8 @@ const Header = () => {
         </div>
       </header>
 
-      {/* 側邊欄 */}
-      <Sidebar />
-
-      {/* 主要內容區域的間距 */}
-      <div className={`transition-all duration-300 mt-16 ${
-        isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
-      }`}>
+      {/* 主要內容區域 */}
+      <div className="mt-16">
         {/* 這裡的內容會由 Outlet 組件渲染 */}
       </div>
 
