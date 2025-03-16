@@ -7,6 +7,7 @@ import MobileMenu from './MobileMenu';
 import logoImage from '../assets/icons/player.jpg';
 import SuccessMessage from './UI/SuccessMessage';
 import LoadingState from './UI/LoadingState';
+import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
 
 const Header = () => {
   // 從 ThemeContext 獲取主題相關狀態和方法
@@ -94,7 +95,7 @@ const Header = () => {
           <div className="flex justify-between items-center h-full">
             {/* Logo 區域 */}
             <div className="flex items-center space-x-4">
-              <Link to="/" className="flex items-center space-x-2">
+              <Link to="/" className="flex items-center space-x-2" data-testid="desktop-logo">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                   width="32" 
@@ -119,14 +120,18 @@ const Header = () => {
 
             {/* 搜尋欄 */}
             <div className="hidden md:flex flex-1 max-w-2xl mx-8">
-              <form onSubmit={handleSearch} className="w-full">
+              <form 
+                onSubmit={handleSearch}
+                className="hidden md:flex items-center"
+                data-testid="desktop-search-form"
+              >
                 <div className="relative">
                   <input
                     type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="搜尋文章、用戶或標籤..."
-                    className="w-full px-4 py-2 pl-10 pr-4 text-gray-700 bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                    className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700"
                   />
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500 dark:text-gray-400" viewBox="0 0 24 24">
@@ -145,16 +150,12 @@ const Header = () => {
                     onClick={toggleTheme}
                     className="hidden md:flex p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
                     aria-label="切換暗黑模式"
+                    data-testid="desktop-theme-toggle"
                   >
                     {isDarkMode ? (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 36 36">
-                        <path fill="#FFAC33" d="M16 2s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2zm18 14s2 0 2 2s-2 2-2 2h-2s-2 0-2-2s2-2 2-2zM4 16s2 0 2 2s-2 2-2 2H2s-2 0-2-2s2-2 2-2zm5.121-8.707s1.414 1.414 0 2.828s-2.828 0-2.828 0L4.878 8.708s-1.414-1.414 0-2.829c1.415-1.414 2.829 0 2.829 0zm21 21s1.414 1.414 0 2.828s-2.828 0-2.828 0l-1.414-1.414s-1.414-1.414 0-2.828s2.828 0 2.828 0zm-.413-18.172s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zm-21 21s-1.414 1.414-2.828 0s0-2.828 0-2.828l1.414-1.414s1.414-1.414 2.828 0s0 2.828 0 2.828zM16 32s0-2 2-2s2 2 2 2v2s0 2-2 2s-2-2-2-2z"/>
-                        <circle cx="18" cy="18" r="10" fill="#FFAC33"/>
-                      </svg>
+                      <SunIcon className="w-6 h-6" />
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24">
-                        <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9s9-4.03 9-9c0-.46-.04-.92-.1-1.36c-.98 1.37-2.58 2.26-4.4 2.26c-3.03 0-5.5-2.47-5.5-5.5c0-1.82.89-3.42 2.26-4.4c-.44-.06-.9-.1-1.36-.1z"/>
-                      </svg>
+                      <MoonIcon className="w-6 h-6" />
                     )}
                 </button>
               
@@ -190,30 +191,21 @@ const Header = () => {
                   <div className="relative">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="flex items-center space-x-3 focus:outline-none"
+                      className="relative"
+                      data-testid="user-avatar-button"
                     >
-                      <div className="relative">
-                        {currentUser.photoURL ? (
-                          <img
-                            src={currentUser.photoURL}
-                            alt="用戶頭像"
-                            className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
-                            style={{ aspectRatio: '1/1' }}
-                          />
-                        ) : (
-                          <img
-                            src={defaultAvatar}
-                            alt="預設頭像"
-                            className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800"
-                            style={{ aspectRatio: '1/1' }}
-                          />
-                        )}
-                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
-                      </div>
+                      <img
+                        src={currentUser.photoURL || defaultAvatar}
+                        alt="用戶頭像"
+                        className="w-8 h-8 rounded-full"
+                      />
                     </button>
 
                     {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-lg py-1 z-50">
+                      <div 
+                        className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2"
+                        data-testid="user-dropdown"
+                      >
                         <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
                           <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
                             {currentUser.displayName || '使用者'}
@@ -256,11 +248,17 @@ const Header = () => {
                   </div>
                 </div>
               ) : (
-                <div className="hidden md:flex items-center space-x-4">
-                  <Link to="/sign" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <div className="hidden md:flex items-center space-x-4" data-testid="desktop-nav">
+                  <Link
+                    to="/sign"
+                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                  >
                     登入
                   </Link>
-                  <Link to="/register" className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                  <Link
+                    to="/register"
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                  >
                     註冊
                   </Link>
                 </div>
